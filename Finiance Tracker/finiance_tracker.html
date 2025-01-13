@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css" rel="stylesheet">
+    <style>
+/* Global Styles */
+:root {
+    --primary-color: #4e73df;
+    --success-color: #1cc88a;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+}
+
+body.bg-gradient {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    min-height: 100vh;
+}
+
+/* Auth Styles */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-inner {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-form-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    padding: 40px;
+    animation: slideIn 0.5s ease;
+}
+
+.auth-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.auth-subtitle {
+    color: #6c757d;
+    margin-bottom: 30px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form .form-control {
+    border-radius: 0 5px 5px 0;
+    height: 45px;
+}
+
+.auth-form .input-group-text {
+    border-radius: 5px 0 0 5px;
+    background: #f8f9fa;
+    width: 45px;
+    justify-content: center;
+}
+
+.auth-form .btn {
+    height: 45px;
+    font-weight: 600;
+    width: 100%;
+}
+
+/* Dashboard Styles */
+.navbar {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-card.income {
+    border-left: 4px solid var(--success-color);
+}
+
+.stats-card.expense {
+    border-left: 4px solid var(--danger-color);
+}
+
+.stats-card.balance {
+    border-left: 4px solid var(--primary-color);
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.income .stats-icon {
+    background: rgba(28, 200, 138, 0.1);
+    color: var(--success-color);
+}
+
+.expense .stats-icon {
+    background: rgba(231, 74, 59, 0.1);
+    color: var(--danger-color);
+}
+
+.balance .stats-icon {
+    background: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+}
+
+.stats-info h5 {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.stats-info h3 {
+    margin: 5px 0 0;
+    font-weight: 700;
+}
+
+.transaction-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.transaction-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.5s ease;
+}
+
+/* Sweet Alert Customization */
+.swal2-popup {
+    border-radius: 15px;
+}
+
+.swal2-title {
+    color: var(--primary-color) !important;
+}
+
+.swal2-styled.swal2-confirm {
+    background: var(--primary-color) !important;
+}
+
+</style>
+</head>
+<body class="bg-gradient">
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-wrapper">
+        <div class="auth-inner">
+            <div class="auth-form-container">
+                <div class="auth-form-content">
+                    <div class="text-center">
+                        <h1 class="auth-title">Welcome Back!</h1>
+                        <p class="auth-subtitle">Please sign-in to your account</p>
+                    </div>
+                    
+                    <!-- Login Form -->
+                    <form id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                    </form>
+                    
+                    <p class="text-center mt-3">
+                        Don't have an account? 
+                        <a href="#" id="showRegister">Sign Up</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Register Form (Hidden by default) -->
+            <div class="auth-form-container d-none" id="registerContainer">
+                <div class="auth-form-content">
+                    <div class="text-center">
+                        <h1 class="auth-title">Create Account</h1>
+                        <p class="auth-subtitle">Fill in your details to register</p>
+                    </div>
+                    
+                    <form id="registerForm" class="auth-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">Create Account</button>
+                    </form>
+                    
+                    <p class="text-center mt-3">
+                        Already have an account? 
+                        <a href="#" id="showLogin">Sign In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div id="dashboardContainer" class="dashboard-container d-none">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span id="userName" class="text-white fw-bold"></span>
+                </div>
+                <button class="btn btn-outline-light" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="stats-card income">
+                        <div class="stats-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h5>Total Income</h5>
+                            <h3 id="totalIncome">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card expense">
+                        <div class="stats-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h5>Total Expenses</h5>
+                            <h3 id="totalExpenses">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card balance">
+                        <div class="stats-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h5>Balance</h5>
+                            <h3 id="totalBalance">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4>Income vs Expenses</h4>
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h4>Expense Distribution</h4>
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h4 class="d-flex justify-content-between align-items-center">
+                        Transactions
+                        <button class="btn btn-primary" onclick="showAddTransactionModal()">
+                            <i class="fas fa-plus"></i> Add Transaction
+                        </button>
+                    </h4>
+                    <div id="transactionsList" class="row g-3 mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+// Initialize Charts
+let lineChart = null;
+let pieChart = null;
+
+// User Management Class
+class UserManager {
+    constructor() {
+        this.users = JSON.parse(localStorage.getItem('users')) || {};
+	// Add these lines to check for existing session
+    	const savedUser = sessionStorage.getItem('currentUser');
+    	this.currentUser = savedUser ? JSON.parse(savedUser) : null;
+    }
+
+    register(name, email, password) {
+        return new Promise((resolve, reject) => {
+            if (this.users[email]) {
+                reject('User already exists');
+                return;
+            }
+
+            this.users[email] = {
+                name,
+                password,
+                transactions: []
+            };
+
+            this.saveUsers();
+            resolve(true);
+        });
+    }
+
+    login(email, password) {
+        return new Promise((resolve, reject) => {
+            const user = this.users[email];
+            if (!user || user.password !== password) {
+                reject('Invalid credentials');
+                return;
+            }
+
+            this.currentUser = {
+                email,
+                name: user.name
+            };
+	    sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+            resolve(true);
+        });
+    }
+
+    logout() {
+    this.currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    }
+
+    saveUsers() {
+        localStorage.setItem('users', JSON.stringify(this.users));
+    }
+
+    addTransaction(transaction) {
+        const currentUserData = this.users[this.currentUser.email];
+        currentUserData.transactions.push({
+            id: Date.now(),
+            ...transaction,
+            timestamp: new Date().toISOString()
+        });
+        this.saveUsers();
+        return true;
+    }
+
+    deleteTransaction(id) {
+        const currentUserData = this.users[this.currentUser.email];
+        currentUserData.transactions = currentUserData.transactions.filter(t => t.id !== id);
+        this.saveUsers();
+        return true;
+    }
+
+    updateTransaction(id, updatedData) {
+        const currentUserData = this.users[this.currentUser.email];
+        const index = currentUserData.transactions.findIndex(t => t.id === id);
+        if (index !== -1) {
+            currentUserData.transactions[index] = {
+                ...currentUserData.transactions[index],
+                ...updatedData
+            };
+            this.saveUsers();
+            return true;
+        }
+        return false;
+    }
+
+    getTransactions() {
+        return this.users[this.currentUser.email].transactions;
+    }
+}
+
+// UI Management Class
+class UIManager {
+    constructor(userManager) {
+        this.userManager = userManager;
+        this.initializeEventListeners();
+        this.initializeCharts();
+	if (this.userManager.currentUser) {
+        this.showDashboard();
+    }
+    }
+
+    initializeEventListeners() {
+        // Auth form toggling
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleAuthForms('register');
+        });
+
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggleAuthForms('login');
+        });
+
+        // Form submissions
+        document.getElementById('registerForm').addEventListener('submit', this.handleRegister.bind(this));
+        document.getElementById('loginForm').addEventListener('submit', this.handleLogin.bind(this));
+    }
+
+    toggleAuthForms(show) {
+        const loginContainer = document.querySelector('.auth-form-container');
+        const registerContainer = document.getElementById('registerContainer');
+        
+        if (show === 'register') {
+            loginContainer.classList.add('d-none');
+            registerContainer.classList.remove('d-none');
+        } else {
+            loginContainer.classList.remove('d-none');
+            registerContainer.classList.add('d-none');
+        }
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const form = e.target;
+        const name = form.querySelector('input[type="text"]').value;
+        const email = form.querySelector('input[type="email"]').value;
+        const password = form.querySelector('input[type="password"]').value;
+
+        try {
+            await this.userManager.register(name, email, password);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Registration Successful!',
+                text: 'Please login with your credentials',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            this.toggleAuthForms('login');
+            form.reset();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Registration Failed',
+                text: error
+            });
+        }
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const form = e.target;
+        const email = form.querySelector('input[type="email"]').value;
+        const password = form.querySelector('input[type="password"]').value;
+
+        try {
+            await this.userManager.login(email, password);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Welcome Back!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            this.showDashboard();
+            form.reset();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: error
+            });
+        }
+    }
+
+    showDashboard() {
+        document.getElementById('authContainer').classList.add('d-none');
+        document.getElementById('dashboardContainer').classList.remove('d-none');
+        document.getElementById('userName').textContent = this.userManager.currentUser.name;
+        this.updateDashboard();
+    }
+
+    updateDashboard() {
+        const transactions = this.userManager.getTransactions();
+        this.updateStats(transactions);
+        this.updateTransactionsList(transactions);
+        this.updateCharts(transactions);
+    }
+
+    updateStats(transactions) {
+        const totalIncome = transactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+        const totalExpenses = transactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+        document.getElementById('totalIncome').textContent = `₹${totalIncome.toFixed(2)}`;
+        document.getElementById('totalExpenses').textContent = `₹${totalExpenses.toFixed(2)}`;
+        document.getElementById('totalBalance').textContent = `₹${(totalIncome - totalExpenses).toFixed(2)}`;
+    }
+
+    updateTransactionsList(transactions) {
+        const container = document.getElementById('transactionsList');
+        container.innerHTML = '';
+
+        transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .forEach(transaction => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 animate-slide-in';
+                col.innerHTML = this.createTransactionCard(transaction);
+                container.appendChild(col);
+            });
+    }
+
+    createTransactionCard(transaction) {
+        return `
+            <div class="card transaction-card ${transaction.type === 'income' ? 'border-success' : 'border-danger'}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">${transaction.description}</h5>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTransaction(${transaction.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction(${transaction.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="card-text">
+                        <span class="badge ${transaction.type === 'income' ? 'bg-success' : 'bg-danger'}">
+                            ${transaction.type === 'income' ? '+' : '-'}₹${parseFloat(transaction.amount).toFixed(2)}
+                        </span>
+                        <small class="text-muted ms-2">${new Date(transaction.date).toLocaleDateString()}</small>
+                    </p>
+                </div>
+            </div>
+        `;
+    }
+
+    initializeCharts() {
+        // Line Chart
+        const lineCtx = document.getElementById('lineChart').getContext('2d');
+        lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Income',
+                        borderColor: '#1cc88a',
+                        data: []
+                    },
+                    {
+                        label: 'Expenses',
+                        borderColor: '#e74a3b',
+                        data: []
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Pie Chart
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        pieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    data: [0, 0],
+                    backgroundColor: ['#1cc88a', '#e74a3b']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+
+    updateCharts(transactions) {
+        // Process data for line chart
+        const monthlyData = this.processMonthlyData(transactions);
+        
+        lineChart.data.labels = monthlyData.labels;
+        lineChart.data.datasets[0].data = monthlyData.incomeData;
+        lineChart.data.datasets[1].data = monthlyData.expenseData;
+        lineChart.update();
+
+        // Process data for pie chart
+        const totalIncome = transactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+        const totalExpenses = transactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+
+        pieChart.data.datasets[0].data = [totalIncome, totalExpenses];
+        pieChart.update();
+    }
+
+    processMonthlyData(transactions) {
+        const monthlyData = {};
+        const now = new Date();
+        const last6Months = Array.from({length: 6}, (_, i) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            return d.toLocaleString('default', { month: 'short' });
+        }).reverse();
+
+        last6Months.forEach(month => {
+            monthlyData[month] = { income: 0, expense: 0 };
+        });
+
+        transactions.forEach(transaction => {
+            const month = new Date(transaction.date)
+                .toLocaleString('default', { month: 'short' });
+            if (monthlyData[month]) {
+                if (transaction.type === 'income') {
+                    monthlyData[month].income += parseFloat(transaction.amount);
+                } else {
+                    monthlyData[month].expense += parseFloat(transaction.amount);
+                }
+            }
+        });
+
+        return {
+            labels: Object.keys(monthlyData),
+            incomeData: Object.values(monthlyData).map(d => d.income),
+            expenseData: Object.values(monthlyData).map(d => d.expense)
+        };
+    }
+}
+
+// Initialize Application
+const userManager = new UserManager();
+const uiManager = new UIManager(userManager);
+
+// Global Functions
+async function showAddTransactionModal() {
+    const { value: formValues } = await Swal.fire({
+        title: 'Add New Transaction',
+        html: `
+            <input id="swal-description" class="swal2-input" placeholder="Description">
+            <input id="swal-amount" class="swal2-input" type="number" placeholder="Amount">
+            <select id="swal-type" class="swal2-select">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <input id="swal-date" class="swal2-input" type="date" value="${new Date().toISOString().split('T')[0]}">
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        preConfirm: () => {
+            return {
+                description: document.getElementById('swal-description').value,
+                amount: document.getElementById('swal-amount').value,
+                type: document.getElementById('swal-type').value,
+                date: document.getElementById('swal-date').value
+            };
+        }
+    });
+
+    if (formValues) {
+        userManager.addTransaction(formValues);
+        uiManager.updateDashboard();
+    }
+}
+
+async function editTransaction(id) {
+    const transaction = userManager.getTransactions().find(t => t.id === id);
+    
+    const { value: formValues } = await Swal.fire({
+        title: 'Edit Transaction',
+        html: `
+            <input id="swal-description" class="swal2-input" value="${transaction.description}">
+            <input id="swal-amount" class="swal2-input" type="number" value="${transaction.amount}">
+            <select id="swal-type" class="swal2-select">
+                <option value="income" ${transaction.type === 'income' ? 'selected' : ''}>Income</option>
+                <option value="expense" ${transaction.type === 'expense' ? 'selected' : ''}>Expense</option>
+            </select>
+            <input id="swal-date" class="swal2-input" type="date" value="${transaction.date}">
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        preConfirm: () => {
+            return {
+                description: document.getElementById('swal-description').value,
+                amount: document.getElementById('swal-amount').value,
+                type: document.getElementById('swal-type').value,
+                date: document.getElementById('swal-date').value
+            };
+        }
+    });
+
+    if (formValues) {
+        userManager.updateTransaction(id, formValues);
+        uiManager.updateDashboard();
+    }
+}
+
+async function deleteTransaction(id) {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+        userManager.deleteTransaction(id);
+        uiManager.updateDashboard();
+        Swal.fire(
+            'Deleted!',
+            'Your transaction has been deleted.',
+            'success'
+        );
+    }
+}
+
+function logout() {
+    userManager.logout();
+    document.getElementById('authContainer').classList.remove('d-none');
+    document.getElementById('dashboardContainer').classList.add('d-none');
+    lineChart.destroy();
+    pieChart.destroy();
+    uiManager.initializeCharts();
+}
+</script>
+</body>
+</html>
